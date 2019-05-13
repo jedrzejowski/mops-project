@@ -18,11 +18,19 @@ class Rooter:
         return self.__name
 
     def addPort(self, name):
-        self.__ports[name] = Port(name)
+        port = Port(name)
+        self.__ports[name] = port
+        return port
 
     def getPort(self, name):
+        """
+
+        :param name:
+        :type name: str
+        :return:
+        :rtype: Port
+        """
         return self.__ports[name]
 
     def getPorts(self):
         return self.__ports
-

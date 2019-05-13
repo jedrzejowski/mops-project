@@ -1,4 +1,6 @@
 from queue import Queue
+from package import Package
+
 
 class Port:
     def __init__(self, name):
@@ -25,6 +27,11 @@ class Port:
         pass
 
     def putInInput(self, pkg):
+        """
+        :param pkg:
+        :type pkg: Package
+        :return:
+        """
         self.__input.put(pkg)
 
     def putInOutput(self, pkg):

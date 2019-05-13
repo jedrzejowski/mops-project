@@ -15,18 +15,21 @@ r2.addPort("b")
 r3.addPort("a")
 r3.addPort("b")
 
+r1.getPort("a").putInInput(Package(0, "qq"))
 
-def start():
+
+def start(time):
     pass
 
 
 def step(rooter, port):
-    print(rooter)
-    print(port)
+    pass
 
 
-def end():
+def end(time):
     pass
 
 
 Runtime.execute(start, step, end)
+
+Runtime.printStatus()
