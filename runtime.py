@@ -8,10 +8,12 @@ def execute(start, step, end):
 
         start(time)
 
-        for rooter in allRooters:
-            ports = rooter.getPorts()
-            for portName in rooter.getPorts():
-                step(rooter=rooter, port=ports[portName])
+        # for rooter in allRooters:
+        #     ports = rooter.getPorts()
+        #     for portName in rooter.getPorts():
+        #         step(rooter=rooter, port=ports[portName])
+
+        step()
 
         end(time)
 

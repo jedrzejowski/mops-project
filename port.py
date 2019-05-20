@@ -16,15 +16,33 @@ class Port:
     def getName(self):
         return self.__name
 
-    def popInputTo(self, port):
-        pkg = self.__input.get()
-        port.putInOutput(pkg)
-        pass
+    def hasInput(self):
+        """
+        :return:
+        :rtype: bool
+        """
+        return self.__input.empty()
 
-    def popOutputTo(self, port):
-        pkg = self.__output.get()
-        port.putInInput(pkg)
-        pass
+    def popInput(self, port):
+        """
+        :return:
+        :rtype: Package
+        """
+        return self.__input.get()
+
+    def hasOutput(self):
+        """
+        :return:
+        :rtype: bool
+        """
+        return self.__output.empty()
+
+    def popOutput(self, port):
+        """
+        :return:
+        :rtype: Package
+        """
+        return self.__output.get()
 
     def putInInput(self, pkg):
         """
