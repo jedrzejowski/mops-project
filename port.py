@@ -5,12 +5,12 @@ from package import Package
 class Port:
     def __init__(self, name):
         self.__name = name
-        self.__input = Queue()
-        self.__output = Queue()
+        self.__input = []
+        self.__output = []
 
     def __str__(self):
-        i = self.__input.qsize()
-        o = self.__output.qsize()
+        i = len(self.__input)
+        o = len(self.__output)
         return f"Port(name={self.__name}, inlen={i}, outlen={o})"
 
     def getName(self):
@@ -21,28 +21,28 @@ class Port:
         :return:
         :rtype: bool
         """
-        return self.__input.empty()
+        return len(self.__input) > 0
 
-    def popInput(self, port):
+    def popInput(self):
         """
         :return:
         :rtype: Package
         """
-        return self.__input.get()
+        return self.__input.pop(0)
 
     def hasOutput(self):
         """
         :return:
         :rtype: bool
         """
-        return self.__output.empty()
+        return len(self.__output) > 0
 
-    def popOutput(self, port):
+    def popOutput(self):
         """
         :return:
         :rtype: Package
         """
-        return self.__output.get()
+        return self.__output.pop(0)
 
     def putInInput(self, pkg):
         """
@@ -50,7 +50,7 @@ class Port:
         :type pkg: Package
         :return:
         """
-        self.__input.put(pkg)
+        self.__input.append(pkg)
 
     def putInOutput(self, pkg):
-        self.__output.put(pkg)
+        self.__output.append(pkg)

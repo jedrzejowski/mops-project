@@ -6,14 +6,33 @@ def execute(start, step, end):
 
     for time in range(0, 1000):
 
+        print(f"Start of {time}")
+
         start(time)
 
-        # for rooter in allRooters:
-        #     ports = rooter.getPorts()
-        #     for portName in rooter.getPorts():
-        #         step(rooter=rooter, port=ports[portName])
+        iters = []
 
-        step()
+        # Interujemy po wszystkich portach
+        for rooter in allRooters:
+
+            ports = rooter.getPorts()
+
+            for portName in rooter.getPorts():
+
+                port = ports[portName]
+
+                outpkg = None
+                inpkg = None
+
+                if port.hasInput():
+                    inpkg = port.popInput()
+                if port.hasOutput():
+                    outpkg = port.popOutput()
+
+                iters.append([rooter, port, inpkg, outpkg])
+
+        for i in iters:
+            step(i[0], i[1], i[2], i[3])
 
         end(time)
 
