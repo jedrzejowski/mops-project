@@ -17,20 +17,17 @@ r3a = r3.addPort("a")
 r3b = r3.addPort("b")
 
 
-def start():
+def start(time):
     # Host 1 generuje pakiet i wysyła go do rootera 1
     r1a.putInInput(Package(1, "heja"))
-    pass
 
 
 def step(rooter, port):
-    print(rooter)
-    print(port)
-
-
-def end():
-    Runtime.printState()
     pass
+
+
+def end(time):
+    Runtime.printStatus()
 
 
 Runtime.execute(start, step, end)

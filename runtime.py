@@ -2,19 +2,24 @@ from rooter import allRooters
 
 
 def execute(start, step, end):
-    start()
+    global time
 
-    for rooter in allRooters:
-        ports = rooter.getPorts()
-        for portName in rooter.getPorts():
-            step(rooter=rooter, port=ports[portName])
+    for time in range(0, 1000):
 
-    end()
+        start(time)
+
+        for rooter in allRooters:
+            ports = rooter.getPorts()
+            for portName in rooter.getPorts():
+                step(rooter=rooter, port=ports[portName])
+
+        end(time)
 
 
-def printState():
+def printStatus():
     for rooter in allRooters:
         print(rooter)
         ports = rooter.getPorts()
         for portName in rooter.getPorts():
-            print(ports[portName], end="")
+            print("    ", end="")
+            print(ports[portName])
