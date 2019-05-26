@@ -1,141 +1,98 @@
+import time
+
 from rooter import Rooter
-from package import Package
-import runtime as Runtime
+from host import Host
+from event import Event
 
 # Definicje Rooterów
-
 r1 = Rooter("R1")
-r1.addPort("a")
-r1.addPort("b")
-r1.addPort("c")
-
 r2 = Rooter("R2")
-r2.addPort("a")
-r2.addPort("b")
-r2.addPort("c")
-
 r3 = Rooter("R3")
-r3.addPort("a")
-r3.addPort("b")
-r3.addPort("c")
+
+# Definicja Hostów
+h1 = Host("H1", r1)
+h2 = Host("H2")
+
+# definicja połączeń
+r1.addPort("a", r2)
+r2.addPort("a", r3)
+r3.addPort("a", h2)
 
 
-def start(time):
-    # Host 1 generuje pakiet i wysyła go do rootera 1
-    r1.getPort("a").putInInput(Package(1, "heja"))
-
-    r1.getPort("c").putInInput(Package(2, "heja"))
-
-    r2.getPort("c").putInInput(Package(3, "heja"))
+def rooter1Rooting(pkg):
+    r1.getPort("a").putPkg(pkg)
+    return
 
 
-def step(rooter, port, inpkg, outpkg):
-    """
-
-    :param rooter:
-    :param port:
-    :param inpkg:
-    :param outpkg:
-    :return:
-    :type rooter: Rooter
-    :type port: Port
-    :type inpkg: Package
-    :type outpkg: Package
-    """
-
-    id = rooter.getName() + ":" + port.getName()
-
-    # Rooter 1
-    if "R1:a" == id:
-
-        if inpkg is not None:
-            if inpkg.getHeader() == 1:
-                r1.getPort("b").putInOutput(inpkg)
-
-        if outpkg is not None:
-            pass
-
-    if "R1:b" == id:
-
-        if inpkg is not None:
-            pass
-
-        if outpkg is not None:
-            r2.getPort("a").putInInput(outpkg)
-
-    if "R1:c" == id:
-
-        if inpkg is not None:
-            if inpkg.getHeader() == 2:
-                r1.getPort("b").putInOutput(inpkg)
-
-        if outpkg is not None:
-            pass
-
-    # Rooter 2
-    if "R2:a" == id:
-
-        if inpkg is not None:
-            if inpkg.getHeader() == 1:
-                r2.getPort("b").putInOutput(inpkg)
-            if inpkg.getHeader() == 2:
-                r2.getPort("c").putInOutput(inpkg)
-
-        if outpkg is not None:
-            pass
-
-    if "R2:b" == id:
-
-        if inpkg is not None:
-            pass
-
-        if outpkg is not None:
-            r3.getPort("a").putInInput(outpkg)
-
-    if "R2:c" == id:
-
-        if inpkg is not None:
-            if inpkg.getHeader() == 1:
-                r2.getPort("b").putInOutput(inpkg)
-            if inpkg.getHeader() == 3:
-                r2.getPort("b").putInOutput(inpkg)
-
-        if outpkg is not None:
-            pass
-
-    # Rooter 3
-    if "R3:a" == id:
-
-        if inpkg is not None:
-            if inpkg.getHeader() == 3:
-                r3.getPort("c").putInOutput(inpkg)
-            if inpkg.getHeader() == 1:
-                r3.getPort("b").putInOutput(inpkg)
-
-        if outpkg is not None:
-            pass
-
-    if "R3:b" == id:
-
-        if inpkg is not None:
-            pass
-
-        if outpkg is not None:
-            pass
-
-    if "R3:c" == id:
-
-        if inpkg is not None:
-            pass
-
-        if outpkg is not None:
-            pass
+def rooter2Rooting(pkg):
+    r2.getPort("a").putPkg(pkg)
+    return
 
 
-def end(time):
-    Runtime.printStatus()
+def rooter3Rooting(pkg):
+    r3.getPort("a").putPkg(pkg)
+    return
 
 
-Runtime.execute(start, step, end)
+r1.setRooting(rooter1Rooting)
+r2.setRooting(rooter2Rooting)
+r3.setRooting(rooter3Rooting)
 
-print("end")
+# Wygenerowanie pakietów
+
+
+while True:
+    print("step")
+
+    # Obsługa zdarzeń
+
+    event = Event.popEvent()
+
+    if event is None:
+        time.sleep(2)
+        continue
+
+    print(event.name + " " + str(event.when))
+
+    if event.name == "arrival":
+        # {rooter, pkg}
+        params = event.params
+
+        rooter = params["rooter"]
+        pkg = params["pkg"]
+
+        rooter.acceptPkg(pkg)
+
+        pass
+
+    if event.name == "serviced":
+        # {port}
+        params = event.params
+
+        port = params["port"]
+        pkg = port.popPkg()
+        rooter = port.getTargetRooter()
+
+        Event(100, "arrival", {
+            "rooter": rooter,
+            "pkg": pkg
+        })
+
+        if port.hasPkg():
+            port.makeService()
+
+    if event.name == "pkggen":
+        # {rooter, pkg}
+        params = event.params
+
+        rooter = params["rooter"]
+        pkg = params["pkg"]
+        host = params["host"]
+
+        Event(100, "arrival", {
+            "rooter": rooter,
+            "pkg": pkg
+        })
+
+        host.genPkg()
+

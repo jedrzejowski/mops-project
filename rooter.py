@@ -8,6 +8,7 @@ class Rooter:
     def __init__(self, name):
         self.__ports = {}
         self.__name = name
+        self.__rootingFunc = None
 
         allRooters.append(self)
 
@@ -17,14 +18,13 @@ class Rooter:
     def getName(self):
         return self.__name
 
-    def addPort(self, name):
-        port = Port(name)
+    def addPort(self, name, targetRooter):
+        port = Port(name=name, targetRooter=targetRooter)
         self.__ports[name] = port
         return port
 
     def getPort(self, name):
         """
-
         :param name:
         :type name: str
         :return:
@@ -34,3 +34,11 @@ class Rooter:
 
     def getPorts(self):
         return self.__ports
+
+    def setRooting(self, rootingFunc):
+        self.__rootingFunc = rootingFunc
+
+    def acceptPkg(self, pkg):
+        if self.__rootingFunc is None:
+            return False
+        return self.__rootingFunc(pkg)

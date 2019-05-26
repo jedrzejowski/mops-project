@@ -1,56 +1,58 @@
-from queue import Queue
 from package import Package
+from event import Event
 
 
 class Port:
-    def __init__(self, name):
+    def __init__(self, name, targetRooter):
         self.__name = name
-        self.__input = []
-        self.__output = []
+        self.__pkgs = []
+        self.__targetRooter = targetRooter
 
     def __str__(self):
-        i = len(self.__input)
-        o = len(self.__output)
-        return f"Port(name={self.__name}, inlen={i}, outlen={o})"
+        l = len(self.__pkgs)
+        return f"Port(name={self.__name}, len={l})"
 
     def getName(self):
         return self.__name
 
-    def hasInput(self):
+    def getTargetRooter(self):
+        """
+        :return:
+        :rtype: Rooter
+        """
+        return self.__targetRooter
+
+    def hasPkg(self):
         """
         :return:
         :rtype: bool
         """
-        return len(self.__input) > 0
+        return len(self.__pkgs) > 0
 
-    def popInput(self):
+    def popPkg(self):
         """
         :return:
         :rtype: Package
         """
-        return self.__input.pop(0)
+        return self.__pkgs.pop(0)
 
-    def hasOutput(self):
-        """
-        :return:
-        :rtype: bool
-        """
-        return len(self.__output) > 0
-
-    def popOutput(self):
-        """
-        :return:
-        :rtype: Package
-        """
-        return self.__output.pop(0)
-
-    def putInInput(self, pkg):
+    def putPkg(self, pkg):
         """
         :param pkg:
         :type pkg: Package
         :return:
         """
-        self.__input.append(pkg)
 
-    def putInOutput(self, pkg):
-        self.__output.append(pkg)
+        makeServiceEvent = False
+        if len(self.__pkgs) == 0:
+            makeServiceEvent = True
+
+        self.__pkgs.append(pkg)
+
+        if makeServiceEvent:
+            self.makeService()
+
+    def makeService(self):
+        Event(100, "serviced", {
+            "port": self
+        })
