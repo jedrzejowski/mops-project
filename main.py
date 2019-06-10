@@ -1,98 +1,56 @@
-import time
+import signal
+import sys
+import numpy as numpy
+from mm1 import MM1
 
-from rooter import Rooter
-from host import Host
-from event import Event
-
-# Definicje Rooterów
-r1 = Rooter("R1")
-r2 = Rooter("R2")
-r3 = Rooter("R3")
-
-# Definicja Hostów
-h1 = Host("H1", r1)
-h2 = Host("H2")
-
-# definicja połączeń
-r1.addPort("a", r2)
-r2.addPort("a", r3)
-r3.addPort("a", h2)
+r1 = MM1(25)
+r2 = MM1(25)
+r3 = MM1(25)
 
 
-def rooter1Rooting(pkg):
-    r1.getPort("a").putPkg(pkg)
-    return
+def genPkg():
+    r1.newArrival(numpy.random.poisson(40), 1000 + numpy.random.poisson(50))
 
 
-def rooter2Rooting(pkg):
-    r2.getPort("a").putPkg(pkg)
-    return
+r1.onArrival(lambda event: genPkg())
+r1.onDrop(lambda event: genPkg())
+r1.onService(lambda event: r2.newArrival(0, event.params["size"]))
+r2.onService(lambda event: r3.newArrival(0, event.params["size"]))
 
 
-def rooter3Rooting(pkg):
-    r3.getPort("a").putPkg(pkg)
-    return
+def findNextMM1():
+    t1 = r1.eventList.nextTime()
+    t2 = r2.eventList.nextTime()
+    t3 = r3.eventList.nextTime()
+
+    time = min(t1, t2, t3)
+
+    if time == t1:
+        return r1
+    if time == t2:
+        return r2
+    if time == t3:
+        return r3
 
 
-r1.setRooting(rooter1Rooting)
-r2.setRooting(rooter2Rooting)
-r3.setRooting(rooter3Rooting)
-
-# Wygenerowanie pakietów
+def log():
+    print(f"r1({r1.pkgInQ}), r2({r2.pkgInQ}), r3({r3.pkgInQ})")
 
 
+def signal_handler(sig, frame):
+    print("r1:")
+    r1.printStatus()
+    print("r2:")
+    r2.printStatus()
+    print("r3:")
+    r3.printStatus()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
+genPkg()
 while True:
-    print("step")
-
-    # Obsługa zdarzeń
-
-    event = Event.popEvent()
-
-    if event is None:
-        time.sleep(2)
-        continue
-
-    print(event.name + " " + str(event.when))
-
-    if event.name == "arrival":
-        # {rooter, pkg}
-        params = event.params
-
-        rooter = params["rooter"]
-        pkg = params["pkg"]
-
-        rooter.acceptPkg(pkg)
-
-        pass
-
-    if event.name == "serviced":
-        # {port}
-        params = event.params
-
-        port = params["port"]
-        pkg = port.popPkg()
-        rooter = port.getTargetRooter()
-
-        Event(100, "arrival", {
-            "rooter": rooter,
-            "pkg": pkg
-        })
-
-        if port.hasPkg():
-            port.makeService()
-
-    if event.name == "pkggen":
-        # {rooter, pkg}
-        params = event.params
-
-        rooter = params["rooter"]
-        pkg = params["pkg"]
-        host = params["host"]
-
-        Event(100, "arrival", {
-            "rooter": rooter,
-            "pkg": pkg
-        })
-
-        host.genPkg()
-
+    rooter = findNextMM1()
+    rooter.step2next()
+    log()

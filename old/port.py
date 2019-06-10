@@ -1,5 +1,4 @@
-from package import Package
-from event import Event
+from old.event import Event
 
 
 class Port:

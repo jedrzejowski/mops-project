@@ -1,7 +1,7 @@
 import numpy as numpy
 
-from event import Event
-from package import Package
+from old.event import Event
+from old.package import Package
 
 
 class Host:
