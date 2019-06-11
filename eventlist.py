@@ -8,8 +8,8 @@ class EventList:
         self.events = []
         self.time = -1
 
-    def addEvent(self, delay, name, params):
-        self.events.append(Event(self.time + delay, name, params))
+    def addEvent(self, delay, name):
+        self.events.append(Event(self.time, delay, name))
 
     def popEvent(self):
         """
@@ -46,4 +46,3 @@ class EventList:
                 when = event.when
 
         return when
-

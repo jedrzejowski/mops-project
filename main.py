@@ -3,19 +3,23 @@ import sys
 import numpy as numpy
 from mm1 import MM1
 
-r1 = MM1(25)
-r2 = MM1(25)
-r3 = MM1(25)
+lam = 25
+mi = 25
+queueSize = 25
+
+r1 = MM1(queueSize, mi)
+r2 = MM1(queueSize, mi)
+r3 = MM1(queueSize, mi)
 
 
 def genPkg():
-    r1.newArrival(numpy.random.poisson(40), 1000 + numpy.random.poisson(50))
+    r1.newArrival(numpy.random.poisson(lam))
 
 
 r1.onArrival(lambda event: genPkg())
 r1.onDrop(lambda event: genPkg())
-r1.onService(lambda event: r2.newArrival(0, event.params["size"]))
-r2.onService(lambda event: r3.newArrival(0, event.params["size"]))
+r1.onService(lambda event: r2.newArrival(0))
+r2.onService(lambda event: r3.newArrival(0))
 
 
 def findNextMM1():
@@ -38,6 +42,16 @@ def log():
 
 
 def signal_handler(sig, frame):
+
+    print("Dane:")
+    print(f"    λ               = {lam}")
+    print(f"    µ               = {mi}")
+    print(f"    queueSize       = {queueSize}")
+    print("")
+    print("Wyniki teoretyczne:")
+    print(f"    servicePrec     = {lam/mi*100:14.1f} [%]")
+    print("")
+    print("Wyniki symulacji:")
     print("r1:")
     r1.printStatus()
     print("r2:")
@@ -53,4 +67,5 @@ genPkg()
 while True:
     rooter = findNextMM1()
     rooter.step2next()
-    log()
+    # log()
+

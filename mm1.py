@@ -1,19 +1,23 @@
+import numpy as numpy
 from eventlist import EventList
 
 
 class MM1:
-    def __init__(self, queueSize):
+    def __init__(self, queueSize, mi):
+        self.queueSize = queueSize
+        self.mi = mi
+
         self.pkgInQ = 0
         self.eventList = EventList()
         self.__onArrival = None
         self.__onService = None
         self.__onDrop = None
-        self.queueSize = queueSize
 
+        self.statPkgArrives = 0
         self.statPkgArrived = 0
         self.statPkgServiced = 0
         self.statPkgDropped = 0
-        self.statBytesSum = 0
+        self.statServiceTime = 0
 
     def step2next(self):
         event = self.eventList.popEvent()
@@ -26,10 +30,8 @@ class MM1:
         if event.name == 'service':
             self.__service(event)
 
-    def newArrival(self, delay, size):
-        self.eventList.addEvent(delay, 'arrival', {
-            "size": size
-        })
+    def newArrival(self, delay):
+        self.eventList.addEvent(delay, 'arrival')
 
     def __arrival(self, event):
 
@@ -43,7 +45,7 @@ class MM1:
         self.statPkgArrived += 1
 
         if self.pkgInQ == 1:
-            self.eventList.addEvent(50, 'service', event.params)
+            self.__genService()
 
         if self.__onArrival is not None:
             self.__onArrival(event)
@@ -51,14 +53,16 @@ class MM1:
     def __service(self, event):
         self.pkgInQ -= 1
         self.statPkgServiced += 1
-        self.statBytesSum += event.params["size"]
-        print(event.params["size"])
+        self.statServiceTime += event.delay
 
         if self.pkgInQ > 0:
-            self.eventList.addEvent(50, 'service', event.params)
+            self.__genService()
 
         if self.__onService is not None:
             self.__onService(event)
+
+    def __genService(self):
+        self.eventList.addEvent(numpy.random.poisson(self.mi), 'service')
 
     def onArrival(self, func):
         self.__onArrival = func
@@ -72,10 +76,13 @@ class MM1:
     def printStatus(self):
 
         pkgPerSec = self.statPkgServiced / self.eventList.time * 1000
-        # bytePerSec = self.statPkgServiced / self.eventList.time * 1000
+        servicePrec = self.statServiceTime / self.eventList.time * 100
 
-        print(f"    statPkgArrived  = {self.statPkgArrived}")
-        print(f"    statPkgServiced = {self.statPkgServiced}")
-        print(f"    statPkgDropped  = {self.statPkgDropped}")
-        print(f"    pkgPerSec       = {pkgPerSec:.3f}")
-        # print(f"    bytePerSec      = {bytePerSec:.3f}")
+        pkgDropRate = self.statPkgDropped / (self.statPkgArrived + self.statPkgDropped)
+
+        print(f"    statPkgArrived  = {self.statPkgArrived:14.0f}")
+        print(f"    statPkgServiced = {self.statPkgServiced:14.0f}")
+        print(f"    statPkgDropped  = {self.statPkgDropped:14.0f}")
+        print(f"    pkgDropRate     = {pkgDropRate:14.1f} [%]")
+        print(f"    pkgPerSec       = {pkgPerSec:14.3f} [s]")
+        print(f"    servicePrec     = {servicePrec:14.1f} [%]")
