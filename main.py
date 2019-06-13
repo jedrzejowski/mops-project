@@ -3,13 +3,13 @@ import sys
 import numpy as numpy
 from mm1 import MM1
 
-lam = 25
-mi = 25
-queueSize = 25
+lam = 50
+mi = 49
+queueSize = 1000
 
 r1 = MM1(queueSize, mi)
-r2 = MM1(queueSize, mi)
-r3 = MM1(queueSize, mi)
+# r2 = MM1(queueSize, mi)
+# r3 = MM1(queueSize, mi)
 
 
 def genPkg():
@@ -18,23 +18,23 @@ def genPkg():
 
 r1.onArrival(lambda event: genPkg())
 r1.onDrop(lambda event: genPkg())
-r1.onService(lambda event: r2.newArrival(0))
-r2.onService(lambda event: r3.newArrival(0))
+# r1.onService(lambda event: r2.newArrival(0))
+# r2.onService(lambda event: r3.newArrival(0))
 
 
 def findNextMM1():
     t1 = r1.eventList.nextTime()
-    t2 = r2.eventList.nextTime()
-    t3 = r3.eventList.nextTime()
+    # t2 = r2.eventList.nextTime()
+    # t3 = r3.eventList.nextTime()
 
-    time = min(t1, t2, t3)
+    # time = min(t1, t2, t3)
 
-    if time == t1:
-        return r1
-    if time == t2:
-        return r2
-    if time == t3:
-        return r3
+    # if time == t1:
+    #     return r1
+    # if time == t2:
+    #     return r2
+    # if time == t3:
+    #     return r3
 
 
 def log():
@@ -49,15 +49,15 @@ def signal_handler(sig, frame):
     print(f"    queueSize       = {queueSize}")
     print("")
     print("Wyniki teoretyczne:")
-    print(f"    servicePrec     = {lam/mi*100:14.1f} [%]")
+    print(f"    rho     = {mi/lam*100:14.1f} [%]")
     print("")
     print("Wyniki symulacji:")
     print("r1:")
     r1.printStatus()
-    print("r2:")
-    r2.printStatus()
-    print("r3:")
-    r3.printStatus()
+    # print("r2:")
+    # r2.printStatus()
+    # print("r3:")
+    # r3.printStatus()
     sys.exit(0)
 
 
@@ -65,7 +65,6 @@ signal.signal(signal.SIGINT, signal_handler)
 
 genPkg()
 while True:
-    rooter = findNextMM1()
-    rooter.step2next()
+    r1.step2next()
     # log()
 

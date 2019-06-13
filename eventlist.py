@@ -2,14 +2,15 @@ import math
 
 from event import Event
 
+time = 0
 
 class EventList:
     def __init__(self):
         self.events = []
-        self.time = -1
 
     def addEvent(self, delay, name):
-        self.events.append(Event(self.time, delay, name))
+        global time
+        self.events.append(Event(time, delay, name))
 
     def popEvent(self):
         """
@@ -30,7 +31,9 @@ class EventList:
                 when = event.when
 
         self.events.remove(target)
-        self.time = when
+
+        global time
+        time = when
 
         return target
 
@@ -46,3 +49,7 @@ class EventList:
                 when = event.when
 
         return when
+
+    def getTime(self):
+        global time
+        return time

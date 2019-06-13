@@ -75,10 +75,12 @@ class MM1:
 
     def printStatus(self):
 
-        pkgPerSec = self.statPkgServiced / self.eventList.time * 1000
-        servicePrec = self.statServiceTime / self.eventList.time * 100
+        global time
 
-        pkgDropRate = self.statPkgDropped / (self.statPkgArrived + self.statPkgDropped)
+        pkgPerSec = self.statPkgServiced / self.eventList.getTime() * 1000
+        servicePrec = self.statServiceTime / self.eventList.getTime() * 100
+
+        pkgDropRate = self.statPkgDropped / (self.statPkgArrived + self.statPkgDropped) * 100
 
         print(f"    statPkgArrived  = {self.statPkgArrived:14.0f}")
         print(f"    statPkgServiced = {self.statPkgServiced:14.0f}")
