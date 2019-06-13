@@ -18,6 +18,7 @@ class MM1:
         self.statPkgServiced = 0
         self.statPkgDropped = 0
         self.statServiceTime = 0
+        self.statPkgDelays = []
 
     def step2next(self):
         event = self.eventList.popEvent()
@@ -43,6 +44,7 @@ class MM1:
 
         self.pkgInQ += 1
         self.statPkgArrived += 1
+        self.statPkgDelays.append(event.time)
 
         if self.pkgInQ == 1:
             self.__genService()
@@ -54,6 +56,9 @@ class MM1:
         self.pkgInQ -= 1
         self.statPkgServiced += 1
         self.statServiceTime += event.delay
+
+        i = self.statPkgServiced - 1
+        self.statPkgDelays[i] = event.time - self.statPkgDelays[i]
 
         if self.pkgInQ > 0:
             self.__genService()
@@ -75,8 +80,6 @@ class MM1:
 
     def printStatus(self):
 
-        global time
-
         pkgPerSec = self.statPkgServiced / self.eventList.getTime() * 1000
         servicePrec = self.statServiceTime / self.eventList.getTime() * 100
 
@@ -88,3 +91,4 @@ class MM1:
         print(f"    pkgDropRate     = {pkgDropRate:14.1f} [%]")
         print(f"    pkgPerSec       = {pkgPerSec:14.3f} [s]")
         print(f"    servicePrec     = {servicePrec:14.1f} [%]")
+        print(f"    pkgDelayMean    = {numpy.mean(self.statPkgDelays):14.1f} ")

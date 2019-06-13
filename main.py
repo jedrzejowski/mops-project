@@ -3,8 +3,8 @@ import sys
 import numpy as numpy
 from mm1 import MM1
 
-lam = 50
-mi = 49
+lam = 100
+mi = 1
 queueSize = 1000
 
 r1 = MM1(queueSize, mi)
